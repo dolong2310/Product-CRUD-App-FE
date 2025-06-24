@@ -1,7 +1,23 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: false,
+});
+
+const nextConfig: NextConfig = withBundleAnalyzer({
+  reactStrictMode: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
+});
 
 export default nextConfig;
