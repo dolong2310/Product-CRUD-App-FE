@@ -1,6 +1,7 @@
 import { productApi } from "@/apis/product";
 import AddProductButton from "@/components/AddProductButton";
-import ProductCard from "@/components/ProductCard";
+import ProductList from "@/components/views/ProductList";
+import { dehydrate, QueryClient } from "@tanstack/react-query";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +9,12 @@ export const metadata: Metadata = {
 };
 
 const Products = async () => {
-  const productList = await productApi.getProductList();
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ["products"],
+    queryFn: () => productApi.getProductList(),
+  });
 
   return (
     <section className="container py-8">
@@ -17,9 +23,7 @@ const Products = async () => {
         <AddProductButton />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {productList.data.map((product) => (
-          <ProductCard key={product.id} productData={product} />
-        ))}
+        <ProductList dehydratedState={dehydrate(queryClient)} />
       </div>
     </section>
   );

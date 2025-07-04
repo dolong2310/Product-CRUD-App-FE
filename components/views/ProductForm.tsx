@@ -1,6 +1,10 @@
 "use client";
 
 import { productApi } from "@/apis/product";
+import {
+  createProductAndRevalidate,
+  updateProductAndRevalidate,
+} from "@/app/actions/productActions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,15 +24,12 @@ import {
   UpdateProductBodyType,
 } from "@/schemaValidations/product.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import UploadImage from "../UploadImage";
-import {
-  createProductAndRevalidate,
-  updateProductAndRevalidate,
-} from "@/app/actions/productActions";
 
 type ProductFormType = CreateProductBodyType | UpdateProductBodyType;
 type Props = {
@@ -81,28 +82,33 @@ const ProductForm = ({ productData }: Props) => {
     return response.data;
   };
 
-  const onSubmit = async (values: ProductFormType) => {
-    setLoading(true);
-    try {
+  const mutation = useMutation({
+    mutationFn: async (values: ProductFormType) => {
+      setLoading(true);
       const methods = [handleCreateProduct, handleUpdateProduct];
       const method = methods[Number(IS_EDIT_MODE)];
       const response = await method(values);
-      console.log("product response: ", response);
-
+      return response;
+    },
+    onSuccess: (response) => {
       const title = IS_EDIT_MODE ? "updated" : "created";
       toast.success(`Product ${title} successfully!`, {
         description: `You have successfully ${title} a new product.`,
       });
       router.push("/products");
-    } catch (error: any) {
+    },
+    onError: (error) => {
       handleErrorApi({
         error,
         setError,
       });
-    } finally {
+    },
+    onSettled: () => {
       setLoading(false);
-    }
-  };
+    },
+  });
+
+  const onSubmit = (values: ProductFormType) => mutation.mutate(values);
 
   return (
     <Form {...form}>

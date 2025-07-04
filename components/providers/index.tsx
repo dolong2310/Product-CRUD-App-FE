@@ -1,7 +1,7 @@
-import { cookies } from "next/headers";
 import React from "react";
 import AuthProvider from "./AuthProvider";
 import InitProvider from "./InitProvider";
+import QueryProvider from "./QueryProvider";
 import { ThemeProvider } from "./ThemeProvider";
 
 type Props = {
@@ -10,16 +10,18 @@ type Props = {
 
 const Providers = async ({ children }: Props) => {
   return (
-    <InitProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <AuthProvider>{children}</AuthProvider>
-      </ThemeProvider>
-    </InitProvider>
+    <QueryProvider>
+      <InitProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
+      </InitProvider>
+    </QueryProvider>
   );
 };
 
